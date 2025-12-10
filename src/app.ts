@@ -4,6 +4,18 @@ import cors from 'cors';
 
 const app = express();
 const port = 3000;
+app.use(cors());
+
+const corsOptions = {
+    origin: [
+        'http://localhost:3000',
+        'https://buildx-designer.vercel.app',
+        'https://build-x-designer-api.vercel.app',
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200,
+}
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use ('/api', emailRoutes);
