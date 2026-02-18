@@ -2,16 +2,17 @@
   "name": "buildx-designer-api",
   "version": "1.0.0",
   "description": "API Built for BuildX Designer.",
-  "main": "index.js",
+  "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node src/api.ts",
-    "start": "node dist/api.ts",
+    "dev": "ts-node src/app.ts",
+    "start": "node dist/app.js",
     "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
