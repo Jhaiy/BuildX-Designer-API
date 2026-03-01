@@ -3,7 +3,7 @@ import supabase from "./database.service";
 export async function viewProjectLikes() {
   const { data: projectLikes, error: viewError } = await supabase
     .from("template_interactions")
-    .select("user_id, template_id");
+    .select("*");
 
   if (viewError) {
     throw viewError;
@@ -38,6 +38,7 @@ export async function unlikeProject(userId: string, projectId: string) {
     .from("template_interactions")
     .delete()
     .eq("user_id", userId)
+    .eq("project_id", projectId)
     .select();
 
   if (unlikeError) {
@@ -113,4 +114,42 @@ export async function updateTemplateStatus(
   }
 
   return data;
+}
+
+export async function countProjectLikes(projectId: string) {
+  const { data: likesData, error: countError } = await supabase
+    .from("template_interactions")
+    .select("*", { count: "exact" })
+    .eq("project_id", projectId);
+
+  if (countError) {
+    throw countError;
+  }
+
+  return likesData?.length || 0;
+}
+
+export async function countProjectLikesForProjects(projectIds: string[]) {
+  if (!projectIds.length) {
+    return {} as Record<string, number>;
+  }
+
+  const { data: likesData, error: countError } = await supabase
+    .from("template_interactions")
+    .select("project_id")
+    .in("project_id", projectIds);
+
+  if (countError) {
+    throw countError;
+  }
+
+  const counts = (likesData ?? []).reduce(
+    (acc: Record<string, number>, like: { project_id: string }) => {
+      acc[like.project_id] = (acc[like.project_id] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  return counts;
 }

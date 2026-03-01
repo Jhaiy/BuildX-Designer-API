@@ -8,12 +8,30 @@ import {
   insertTemplateData,
   unpublishTemplate,
   updateTemplateStatus,
+  countProjectLikesForProjects,
 } from "../services/projects.service";
 
 export async function handleViewProjectLikes(req: Request, res: Response) {
   try {
     const projectLikes = await viewProjectLikes();
-    return res.status(200).json({ projectLikes });
+    const likeCountsByProject = (projectLikes ?? []).reduce(
+      (acc: Record<string, number>, like: any) => {
+        acc[like.project_id] = (acc[like.project_id] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const projectLikesWithCount = (projectLikes ?? []).map((like: any) => ({
+      ...like,
+      likeCount: likeCountsByProject[like.project_id] ?? 0,
+    }));
+
+    return res.status(200).json({
+      projectLikes: projectLikesWithCount,
+      totalLikeCount: projectLikesWithCount.length,
+      likeCountsByProject,
+    });
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to view project likes",
@@ -68,7 +86,16 @@ export async function handleFetchTemplateData(req: Request, res: Response) {
 export async function handleDisplayTemplates(req: Request, res: Response) {
   try {
     const templates = await displayTemplates();
-    return res.status(200).json({ templates });
+    const projectIds = (templates ?? []).map(
+      (template: any) => template.project_id,
+    );
+    const likeCounts = await countProjectLikesForProjects(projectIds);
+    const templatesWithLikeCount = (templates ?? []).map((template: any) => ({
+      ...template,
+      likeCount: likeCounts[template.project_id] ?? 0,
+    }));
+
+    return res.status(200).json({ templates: templatesWithLikeCount });
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to display templates",
