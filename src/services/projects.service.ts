@@ -51,7 +51,8 @@ export async function unlikeProject(userId: string, projectId: string) {
 export async function fetchTemplateData(projectId: string) {
   const { data: publishedTemplateData, error: fetchError } = await supabase
     .from("published_templates")
-    .select("project_id, user_id, projects(project_layout)");
+    .select("project_id, user_id, projects(project_layout)")
+    .eq("project_id", projectId);
 
   if (fetchError) {
     throw fetchError;
