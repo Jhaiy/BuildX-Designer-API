@@ -1,5 +1,21 @@
 import supabase from "./database.service";
 
+type ServiceError = Error & {
+  status?: number;
+  details?: unknown;
+};
+
+function createServiceError(
+  message: string,
+  status: number,
+  details?: unknown,
+): ServiceError {
+  const error = new Error(message) as ServiceError;
+  error.status = status;
+  error.details = details;
+  return error;
+}
+
 export async function viewProjectLikes() {
   const { data: projectLikes, error: viewError } = await supabase
     .from("template_interactions")
@@ -14,7 +30,25 @@ export async function viewProjectLikes() {
 
 export async function likeProject(userId: string, projectId: string) {
   if (!userId || !projectId) {
-    throw new Error("Missing required fields: userId and projectId");
+    throw createServiceError(
+      "Missing required fields: userId and projectId",
+      400,
+    );
+  }
+
+  const { data: existingLikes, error: existingLikeError } = await supabase
+    .from("template_interactions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("project_id", projectId)
+    .limit(1);
+
+  if (existingLikeError) {
+    throw existingLikeError;
+  }
+
+  if ((existingLikes ?? []).length > 0) {
+    return existingLikes;
   }
 
   const { data: likeData, error: likeError } = await supabase
@@ -23,6 +57,17 @@ export async function likeProject(userId: string, projectId: string) {
     .select();
 
   if (likeError) {
+    if (likeError.code === "23505") {
+      const { data: fallbackLike } = await supabase
+        .from("template_interactions")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("project_id", projectId)
+        .limit(1);
+
+      return fallbackLike ?? [];
+    }
+
     throw likeError;
   }
 
@@ -31,7 +76,10 @@ export async function likeProject(userId: string, projectId: string) {
 
 export async function unlikeProject(userId: string, projectId: string) {
   if (!userId || !projectId) {
-    throw new Error("Missing required fields: userId and projectId");
+    throw createServiceError(
+      "Missing required fields: userId and projectId",
+      400,
+    );
   }
 
   const { data: unlikeData, error: unlikeError } = await supabase

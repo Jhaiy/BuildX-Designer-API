@@ -11,6 +11,23 @@ import {
   countProjectLikesForProjects,
 } from "../services/projects.service";
 
+type ControllerError = Error & {
+  status?: number;
+  code?: string;
+};
+
+function getErrorStatus(error: ControllerError): number {
+  if (typeof error?.status === "number") {
+    return error.status;
+  }
+
+  if (error?.code === "23505") {
+    return 409;
+  }
+
+  return 500;
+}
+
 export async function handleViewProjectLikes(req: Request, res: Response) {
   try {
     const projectLikes = await viewProjectLikes();
@@ -48,7 +65,7 @@ export async function handleLikeProject(req: Request, res: Response) {
       .status(201)
       .json({ message: "Project liked successfully", like });
   } catch (error: any) {
-    return res.status(500).json({
+    return res.status(getErrorStatus(error)).json({
       error: "Failed to like project",
       details: error?.message ?? error,
     });
@@ -63,7 +80,7 @@ export async function handleUnlikeProject(req: Request, res: Response) {
       .status(200)
       .json({ message: "Project unliked successfully", removedLike });
   } catch (error: any) {
-    return res.status(500).json({
+    return res.status(getErrorStatus(error)).json({
       error: "Failed to unlike project",
       details: error?.message ?? error,
     });
