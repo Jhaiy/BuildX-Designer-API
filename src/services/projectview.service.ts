@@ -4,7 +4,7 @@ export async function viewSharedProjects(userId: string) {
   const { data: sharedProjects, error } = await supabase
     .from("project_collaborators")
     .select(
-      "user_id, project_id, role, projects(projects_id, user_id, project_name, description, thumbnail)",
+      "user_id, project_id, role, projects(projects_id, user_id, project_name, description, thumbnail, is_published)",
     )
     .eq("user_id", userId);
 
