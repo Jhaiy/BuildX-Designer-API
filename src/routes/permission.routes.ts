@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-router.get("/view-permissions", handleViewProjectPermissions);
+router.get("/view-permissions/:projectId", handleViewProjectPermissions);
 
 router.get("/check-permission", handleCheckProjectPermission);
 
