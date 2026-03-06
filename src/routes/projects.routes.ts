@@ -26,7 +26,7 @@ router.get("/display-templates", handleDisplayTemplates);
 
 router.post("/insert-template-data", handleInsertTemplateData);
 
-router.get("/fetch-comments", handleFetchingCommentsSection);
+router.get("/fetch-comments/:projectId", handleFetchingCommentsSection);
 
 router.post("/insert-comment", handleInsertUserComment);
 

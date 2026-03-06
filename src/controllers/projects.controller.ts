@@ -198,7 +198,7 @@ export async function handleFetchingCommentsSection(
   res: Response,
 ) {
   try {
-    const { projectId } = req.body;
+    const { projectId } = req.params;
     const comments = await fetchUserComments(projectId);
     return res.status(200).json({ comments });
   } catch (error: any) {
