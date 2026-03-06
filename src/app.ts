@@ -3,6 +3,7 @@ import emailRoutes from "./routes/email.routes";
 import privacyChangerRoutes from "./routes/privacy.changer.routes";
 import projectRoutes from "./routes/projects.routes";
 import permissionRoutes from "./routes/permission.routes";
+import projectViewRoutes from "./routes/projectview.routes";
 import cors from "cors";
 const app = express();
 const port = 5000;
@@ -26,6 +27,7 @@ app.use("/api", emailRoutes);
 app.use("/api", privacyChangerRoutes);
 app.use("/api", projectRoutes);
 app.use("/api", permissionRoutes);
+app.use("/api", projectViewRoutes);
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
