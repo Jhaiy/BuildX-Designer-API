@@ -109,13 +109,20 @@ export async function handleAddProjectCollaborator(
   req: Request,
   res: Response,
 ) {
-  const { projectId, userId, role } = req.body;
+  const { projectId, email, role } = req.body;
+
+  if (!projectId || !email) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      details: "projectId and email are required",
+    });
+  }
 
   try {
     const collaborator = await addProjectCollaborator(
       projectId,
-      userId,
-      "viewer",
+      email,
+      role ?? "viewer",
     );
     return res
       .status(201)

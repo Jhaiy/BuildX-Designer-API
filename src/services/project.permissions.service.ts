@@ -104,12 +104,27 @@ export async function updateProjectPermission(
 
 export async function addProjectCollaborator(
   projectId: string,
-  userId: string,
+  email: string,
   role: string,
 ) {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("user_id")
+    .eq("email_address", email)
+    .limit(1)
+    .single();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (!profile?.user_id) {
+    throw new Error("User not found for the provided email");
+  }
+
   const { data, error } = await supabase
     .from("project_collaborators")
-    .insert([{ project_id: projectId, user_id: userId, role }])
+    .insert([{ project_id: projectId, user_id: profile.user_id, role }])
     .select();
 
   if (error) {
