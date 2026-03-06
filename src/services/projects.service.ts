@@ -113,7 +113,7 @@ export async function displayTemplates() {
   const { data: templates, error: displayError } = await supabase
     .from("published_templates")
     .select(
-      "project_id, user_id, profiles(user_id, avatar_url, full_name), projects(projects_id, user_id, project_name, thumbnail)",
+      "project_id, user_id, profiles(user_id, avatar_url, full_name), projects(projects_id, description, category, user_id, project_name, thumbnail)",
     );
 
   if (displayError) {
