@@ -1,5 +1,18 @@
 import supabase from "./database.service";
 
+export async function viewPermissions(projectId: string) {
+  const { data, error } = await supabase
+    .from("project_collaborators")
+    .select("user_id, role, profiles (avatar_url, full_name, email_address)")
+    .eq("project_id", projectId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function checkProjectPermission(
   userId: string,
   projectId: string,

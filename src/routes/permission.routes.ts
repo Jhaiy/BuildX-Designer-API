@@ -4,9 +4,12 @@ import {
   handleAddProjectCollaborator,
   handleRemoveProjectCollaborator,
   handleUpdateProjectPermission,
+  handleViewProjectPermissions,
 } from "../controllers/permission.controller";
 
 const router = Router();
+
+router.get("/view-permissions", handleViewProjectPermissions);
 
 router.get("/check-permission", handleCheckProjectPermission);
 

@@ -4,7 +4,32 @@ import {
   addProjectCollaborator,
   removeProjectCollaborator,
   updateProjectPermission,
+  viewPermissions,
 } from "../services/project.permissions.service";
+
+export async function handleViewProjectPermissions(
+  req: Request,
+  res: Response,
+) {
+  const { projectId } = req.params;
+
+  if (!projectId) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      details: "projectId is required",
+    });
+  }
+
+  try {
+    const permissions = await viewPermissions(projectId);
+    return res.status(200).json({ permissions });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to view project permissions",
+      details: error?.message ?? error,
+    });
+  }
+}
 
 export async function handleCheckProjectPermission(
   req: Request,
