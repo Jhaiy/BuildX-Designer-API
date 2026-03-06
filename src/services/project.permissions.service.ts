@@ -8,11 +8,49 @@ export async function viewPermissions(projectId: string) {
     )
     .eq("project_id", projectId);
 
-  if (error) {
+  if (!error) {
+    return data;
+  }
+
+  if (!error.message?.includes("Could not find a relationship")) {
     throw error;
   }
 
-  return data;
+  const { data: collaborators, error: collaboratorsError } = await supabase
+    .from("project_collaborators")
+    .select("user_id, role")
+    .eq("project_id", projectId);
+
+  if (collaboratorsError) {
+    throw collaboratorsError;
+  }
+
+  const userIds = (collaborators ?? []).map(
+    (collaborator) => collaborator.user_id,
+  );
+
+  if (!userIds.length) {
+    return [];
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("user_id, avatar_url, full_name, email_address")
+    .in("user_id", userIds);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  const profilesByUserId = new Map(
+    (profiles ?? []).map((profile) => [profile.user_id, profile]),
+  );
+
+  return (collaborators ?? []).map((collaborator) => ({
+    user_id: collaborator.user_id,
+    role: collaborator.role,
+    profiles: profilesByUserId.get(collaborator.user_id) ?? null,
+  }));
 }
 
 export async function checkProjectPermission(
