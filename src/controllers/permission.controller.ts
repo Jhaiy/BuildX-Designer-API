@@ -3,13 +3,29 @@ import {
   checkProjectPermission,
   addProjectCollaborator,
   removeProjectCollaborator,
+  updateProjectPermission,
 } from "../services/project.permissions.service";
 
 export async function handleCheckProjectPermission(
   req: Request,
   res: Response,
 ) {
-  const { userId, projectId, requiredRole } = req.body;
+  const { userId, projectId } = req.body;
+  const requiredRole = req.body.requiredRole ?? req.body.role;
+
+  if (!userId || !projectId || !requiredRole) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      details: "userId, projectId and requiredRole (or role) are required",
+    });
+  }
+
+  if (!["owner", "editor", "viewer"].includes(requiredRole)) {
+    return res.status(400).json({
+      error: "Invalid role",
+      details: "requiredRole must be one of owner, editor, viewer",
+    });
+  }
 
   try {
     const hasPermission = await checkProjectPermission(
@@ -26,6 +42,44 @@ export async function handleCheckProjectPermission(
   }
 }
 
+export async function handleUpdateProjectPermission(
+  req: Request,
+  res: Response,
+) {
+  const { projectId, userId, newRole } = req.body;
+
+  if (!projectId || !userId || !newRole) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      details: "projectId, userId and newRole are required",
+    });
+  }
+
+  if (!["editor", "viewer"].includes(newRole)) {
+    return res.status(400).json({
+      error: "Invalid role",
+      details: "newRole must be either editor or viewer",
+    });
+  }
+
+  try {
+    const updatedPermission = await updateProjectPermission(
+      projectId,
+      userId,
+      newRole,
+    );
+    return res.status(200).json({
+      message: "Project permission updated successfully",
+      updatedPermission,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to update project permission",
+      details: error?.message ?? error,
+    });
+  }
+}
+
 export async function handleAddProjectCollaborator(
   req: Request,
   res: Response,
@@ -33,7 +87,11 @@ export async function handleAddProjectCollaborator(
   const { projectId, userId, role } = req.body;
 
   try {
-    const collaborator = await addProjectCollaborator(projectId, userId, role);
+    const collaborator = await addProjectCollaborator(
+      projectId,
+      userId,
+      "viewer",
+    );
     return res
       .status(201)
       .json({ message: "Collaborator added successfully", collaborator });

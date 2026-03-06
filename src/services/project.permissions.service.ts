@@ -30,10 +30,29 @@ export async function checkProjectPermission(
   return roleHierarchy[permissions.role] >= roleHierarchy[requiredRole];
 }
 
+export async function updateProjectPermission(
+  projectId: string,
+  userId: string,
+  newRole: "editor" | "viewer",
+) {
+  const { data, error } = await supabase
+    .from("project_collaborators")
+    .update({ role: newRole })
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .select();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function addProjectCollaborator(
   projectId: string,
   userId: string,
-  role: "editor" | "viewer",
+  role: string,
 ) {
   const { data, error } = await supabase
     .from("project_collaborators")
