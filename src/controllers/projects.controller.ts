@@ -9,6 +9,8 @@ import {
   unpublishTemplate,
   updateTemplateStatus,
   countProjectLikesForProjects,
+  fetchUserComments,
+  insertUserComment,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -125,7 +127,7 @@ export async function handleInsertTemplateData(req: Request, res: Response) {
   try {
     const { projectId, userId } = req.body;
     const insertedData = await insertTemplateData(projectId, userId);
-    updateTemplateStatus(projectId, true);
+    await updateTemplateStatus(projectId, true);
     return res
       .status(201)
       .json({ message: "Template data inserted successfully", insertedData });
@@ -167,6 +169,41 @@ export async function handlePublishTemplateStatus(req: Request, res: Response) {
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to update template status",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleInsertUserComment(req: Request, res: Response) {
+  try {
+    const { projectId, userId, userComment } = req.body;
+    const insertedComment = await insertUserComment(
+      projectId,
+      userId,
+      userComment,
+    );
+    return res
+      .status(201)
+      .json({ message: "Comment added successfully", insertedComment });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to insert user comment",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleFetchingCommentsSection(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const { projectId } = req.body;
+    const comments = await fetchUserComments(projectId);
+    return res.status(200).json({ comments });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to fetch comments",
       details: error?.message ?? error,
     });
   }

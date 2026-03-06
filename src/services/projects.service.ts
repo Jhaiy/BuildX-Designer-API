@@ -202,3 +202,38 @@ export async function countProjectLikesForProjects(projectIds: string[]) {
 
   return counts;
 }
+
+export async function insertUserComment(
+  projectId: string,
+  userId: string,
+  userComment: string,
+) {
+  const { data, error } = await supabase
+    .from("template_comments")
+    .insert([
+      { projects_id: projectId, user_id: userId, user_comment: userComment },
+    ])
+    .select();
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function fetchUserComments(projectId: string) {
+  const { data: commentsData, error: fetchError } = await supabase
+    .from("template_comments")
+    .select(
+      "comment_id, user_id, user_comment, profiles(user_id, full_name, avatar_url)",
+    )
+    .eq("projects_id", projectId);
+
+  if (commentsData) {
+    return commentsData;
+  }
+
+  if (fetchError) {
+    throw fetchError;
+  }
+}

@@ -8,6 +8,8 @@ import {
   handleInsertTemplateData,
   handleUnpublishTemplate,
   handlePublishTemplateStatus,
+  handleFetchingCommentsSection,
+  handleInsertUserComment,
 } from "../controllers/projects.controller";
 
 const router = Router();
@@ -23,6 +25,10 @@ router.get("/template-data/:projectId", handleFetchTemplateData);
 router.get("/display-templates", handleDisplayTemplates);
 
 router.post("/insert-template-data", handleInsertTemplateData);
+
+router.get("/fetch-comments", handleFetchingCommentsSection);
+
+router.post("/insert-comment", handleInsertUserComment);
 
 router.delete(
   "/unpublish-template/:projectId",
