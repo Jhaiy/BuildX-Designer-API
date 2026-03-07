@@ -70,11 +70,15 @@ export async function likeProject(userId: string, projectId: string) {
       }
 
       if ((fallbackLike ?? []).length === 0) {
-        throw createServiceError(
-          "Like conflict detected but no matching like found for this user/project",
-          409,
-          likeError,
-        );
+        // Treat duplicate conflicts as idempotent success even if row-level policies
+        // prevent reading the existing row back.
+        return [
+          {
+            user_id: userId,
+            project_id: projectId,
+            already_liked: true,
+          },
+        ];
       }
 
       return fallbackLike ?? [];
