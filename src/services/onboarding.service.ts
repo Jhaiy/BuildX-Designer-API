@@ -2,7 +2,7 @@ import supabase from "./database.service";
 
 interface OnboardingData {
   primary_role: string;
-  wokrplace_type: string;
+  workplace_type: string;
   experience: string;
   main_goal: string;
   team_size: string;
@@ -31,7 +31,7 @@ export async function insertOnboardingData(
       {
         user_id: userId,
         primary_role: data.primary_role,
-        wokrplace_type: data.wokrplace_type,
+        workplace_type: data.workplace_type,
         experience: data.experience,
         main_goal: data.main_goal,
         team_size: data.team_size,
