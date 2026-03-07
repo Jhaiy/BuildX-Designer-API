@@ -8,6 +8,6 @@ const router = Router();
 
 router.get("/onboarding-data", handleFetchUserOnboardingData);
 
-router.post("/onboarding-data", handleInsertOnboardingData);
+router.post("/insert-onboarding-data", handleInsertOnboardingData);
 
 export default router;
