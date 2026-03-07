@@ -4,6 +4,7 @@ import privacyChangerRoutes from "./routes/privacy.changer.routes";
 import projectRoutes from "./routes/projects.routes";
 import permissionRoutes from "./routes/permission.routes";
 import projectViewRoutes from "./routes/projectview.routes";
+import onboardingRoutes from "./routes/onboarding.routes";
 import cors from "cors";
 const app = express();
 const port = 5000;
@@ -28,6 +29,7 @@ app.use("/api", privacyChangerRoutes);
 app.use("/api", projectRoutes);
 app.use("/api", permissionRoutes);
 app.use("/api", projectViewRoutes);
+app.use("/api", onboardingRoutes);
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
