@@ -58,17 +58,52 @@ export async function likeProject(userId: string, projectId: string) {
 
   if (likeError) {
     if (likeError.code === "23505") {
-      const { data: fallbackLike } = await supabase
+      const { data: fallbackLike, error: fallbackLikeError } = await supabase
         .from("template_interactions")
         .select("*")
         .eq("user_id", userId)
         .eq("project_id", projectId)
         .limit(1);
 
+      if (fallbackLikeError) {
+        throw fallbackLikeError;
+      }
+
+      if ((fallbackLike ?? []).length === 0) {
+        throw createServiceError(
+          "Like conflict detected but no matching like found for this user/project",
+          409,
+          likeError,
+        );
+      }
+
       return fallbackLike ?? [];
     }
 
     throw likeError;
+  }
+
+  // Guard against false positives where insert returns no error but no row either.
+  if ((likeData ?? []).length === 0) {
+    const { data: persistedLike, error: persistedLikeError } = await supabase
+      .from("template_interactions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("project_id", projectId)
+      .limit(1);
+
+    if (persistedLikeError) {
+      throw persistedLikeError;
+    }
+
+    if ((persistedLike ?? []).length === 0) {
+      throw createServiceError(
+        "Like operation did not persist a record. Verify table constraints and RLS policies.",
+        500,
+      );
+    }
+
+    return persistedLike;
   }
 
   return likeData;
