@@ -70,8 +70,6 @@ export async function likeProject(userId: string, projectId: string) {
       }
 
       if ((fallbackLike ?? []).length === 0) {
-        // Treat duplicate conflicts as idempotent success even if row-level policies
-        // prevent reading the existing row back.
         return [
           {
             user_id: userId,
@@ -87,7 +85,6 @@ export async function likeProject(userId: string, projectId: string) {
     throw likeError;
   }
 
-  // Guard against false positives where insert returns no error but no row either.
   if ((likeData ?? []).length === 0) {
     const { data: persistedLike, error: persistedLikeError } = await supabase
       .from("template_interactions")
