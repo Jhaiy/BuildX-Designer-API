@@ -8,9 +8,10 @@ import {
   insertTemplateData,
   unpublishTemplate,
   updateTemplateStatus,
-  countProjectLikesForProjects,
   fetchUserComments,
   insertUserComment,
+  getUserTemplateLikes,
+  countProjectLikesForProjects,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -32,6 +33,7 @@ function getErrorStatus(error: ControllerError): number {
 
 export async function handleViewProjectLikes(req: Request, res: Response) {
   try {
+    const { userId } = req.query as { userId?: string };
     const projectLikes = await viewProjectLikes();
     const likeCountsByProject = (projectLikes ?? []).reduce(
       (acc: Record<string, number>, like: any) => {
@@ -46,14 +48,36 @@ export async function handleViewProjectLikes(req: Request, res: Response) {
       likeCount: likeCountsByProject[like.project_id] ?? 0,
     }));
 
+    let likedProjectIds: string[] = [];
+    if (userId) {
+      likedProjectIds = await getUserTemplateLikes(userId);
+    }
+
     return res.status(200).json({
       projectLikes: projectLikesWithCount,
       totalLikeCount: projectLikesWithCount.length,
       likeCountsByProject,
+      likedProjectIds, // Added for compatibility with server.js
     });
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to view project likes",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleTemplateLikes(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required." });
+    }
+    const likedProjectIds = await getUserTemplateLikes(userId);
+    return res.status(200).json({ likedProjectIds });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to fetch template likes.",
       details: error?.message ?? error,
     });
   }

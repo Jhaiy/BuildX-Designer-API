@@ -10,9 +10,12 @@ import {
   handlePublishTemplateStatus,
   handleFetchingCommentsSection,
   handleInsertUserComment,
+  handleTemplateLikes,
 } from "../controllers/projects.controller";
 
 const router = Router();
+
+router.get("/template-likes/:userId", handleTemplateLikes);
 
 router.get("/project-likes", handleViewProjectLikes);
 

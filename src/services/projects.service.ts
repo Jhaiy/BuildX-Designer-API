@@ -28,6 +28,19 @@ export async function viewProjectLikes() {
   return projectLikes;
 }
 
+export async function getUserTemplateLikes(userId: string) {
+  const { data, error } = await supabase
+    .from("template_interactions")
+    .select("project_id")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((row: any) => row.project_id);
+}
+
 export async function likeProject(userId: string, projectId: string) {
   if (!userId || !projectId) {
     throw createServiceError(
