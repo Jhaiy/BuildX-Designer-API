@@ -23,6 +23,7 @@ const allowedOrigins = [
   "https://build-x-designer-api.vercel.app",
   "https://buildxdesigner.vercel.app",
   "https://fork-buildxdesigner.vercel.app",
+  "https://buildxdesigner.site",
 ].filter(Boolean) as string[];
 
 const corsOptions = {
@@ -45,7 +46,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
-app.options("*", cors()); // Permit na naitn lahat potangina HAHAHAHHA
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(requestLogger);
 
@@ -86,6 +87,10 @@ app.use((req, res) => {
     suggestion: "Check if the API path is correctly prefixed with /api",
   });
 });
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+  });
+}
+
+export default app;
