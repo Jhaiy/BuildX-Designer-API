@@ -6,7 +6,7 @@ import {
 
 const router = Router();
 
-router.post("/onboarding-data", handleFetchUserOnboardingData);
+router.get("/onboarding-data/:userId", handleFetchUserOnboardingData);
 
 router.post("/insert-onboarding-data", handleInsertOnboardingData);
 
