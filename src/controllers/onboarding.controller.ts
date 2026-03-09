@@ -9,7 +9,7 @@ export async function handleFetchUserOnboardingData(
   res: Response,
 ) {
   try {
-    const userId = (req.query.userId as string) || req.body?.userId;
+    const {userId} = req.params;
 
     if (!userId) {
       return res.status(400).json({
