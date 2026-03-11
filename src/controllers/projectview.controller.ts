@@ -17,14 +17,7 @@ export async function handleViewSharedProjects(req: Request, res: Response) {
 
     const sharedProjects = await viewSharedProjects(userId);
 
-    if (!sharedProjects || sharedProjects.length === 0) {
-      return res.status(404).json({
-        error: "Not Found",
-        details: "No shared projects found for the specified user",
-      });
-    }
-
-    return res.status(200).json({ sharedProjects });
+    return res.status(200).json({ sharedProjects: sharedProjects || [] });
   } catch (error) {
     return res.status(500).json({
       error: "Internal Server Error",

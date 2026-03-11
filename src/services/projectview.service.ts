@@ -1,26 +1,47 @@
 import supabase from "./database.service";
 
 export async function viewSharedProjects(userId: string) {
+  const normalizedUserId = String(userId).trim();
+
   const { data: sharedProjects, error } = await supabase
     .from("project_collaborators")
     .select(
       "user_id, project_id, role, projects(projects_id, user_id, project_name, description, thumbnail, is_published)",
     )
-    .eq("user_id", userId);
+    .eq("user_id", normalizedUserId);
 
   if (error) {
     throw new Error(error.message);
   }
 
   if (!sharedProjects || sharedProjects.length === 0) {
-    return sharedProjects;
+    return [];
+  }
+
+  const filteredSharedProjects = sharedProjects.filter((sp: any) => {
+    const collaboratorUserId = String(sp?.user_id ?? "").trim();
+    const projectOwnerUserId = String(sp?.projects?.user_id ?? "").trim();
+    const role = String(sp?.role ?? "")
+      .trim()
+      .toLowerCase();
+
+    const isOwnerRole = role === "owner";
+    const isOwnProject =
+      projectOwnerUserId === normalizedUserId ||
+      collaboratorUserId === normalizedUserId;
+
+    return !isOwnerRole && !isOwnProject;
+  });
+
+  if (filteredSharedProjects.length === 0) {
+    return [];
   }
 
   const ownerIds = [
     ...new Set(
-      sharedProjects
+      filteredSharedProjects
         .map((sp: any) => sp.projects?.user_id)
-        .filter((id: any) => id),
+        .filter(Boolean),
     ),
   ];
 
@@ -35,19 +56,15 @@ export async function viewSharedProjects(userId: string) {
 
   const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
 
-  const enrichedProjects = sharedProjects
-    .filter((sp: any) => sp.projects?.user_id !== userId)
-    .map((sp: any) => ({
-      ...sp,
-      projects: sp.projects
-        ? {
-            ...sp.projects,
-            owner_profile: profileMap.get(sp.projects.user_id) || null,
-          }
-        : null,
-    }));
-
-  return enrichedProjects;
+  return filteredSharedProjects.map((sp: any) => ({
+    ...sp,
+    projects: sp.projects
+      ? {
+          ...sp.projects,
+          owner_profile: profileMap.get(sp.projects.user_id) || null,
+        }
+      : null,
+  }));
 }
 
 export async function fetchPublishedTemplates(userId: string) {
