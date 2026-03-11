@@ -19,16 +19,13 @@ export async function viewSharedProjects(userId: string) {
   }
 
   const filteredSharedProjects = sharedProjects.filter((sp: any) => {
-    const collaboratorUserId = String(sp?.user_id ?? "").trim();
     const projectOwnerUserId = String(sp?.projects?.user_id ?? "").trim();
     const role = String(sp?.role ?? "")
       .trim()
       .toLowerCase();
 
     const isOwnerRole = role === "owner";
-    const isOwnProject =
-      projectOwnerUserId === normalizedUserId ||
-      collaboratorUserId === normalizedUserId;
+    const isOwnProject = projectOwnerUserId === normalizedUserId;
 
     return !isOwnerRole && !isOwnProject;
   });
