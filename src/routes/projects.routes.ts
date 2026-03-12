@@ -31,7 +31,7 @@ router.get("/fetch-comments/:projectId", handleFetchingCommentsSection);
 
 router.post("/insert-comment", handleInsertUserComment);
 
-router.get("/api/most-liked-templates", handleFetchMostLikedTemplates);
+router.get("/most-liked-templates", handleFetchMostLikedTemplates);
 
 router.delete(
   "/unpublish-template/:projectId",
