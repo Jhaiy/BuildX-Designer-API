@@ -276,3 +276,50 @@ export async function fetchUserComments(projectId: string) {
     throw fetchError;
   }
 }
+
+export async function fetchMostLikedTemplates(limit = 20) {
+  const { data: templates, error: templatesError } = await supabase
+    .from("published_templates")
+    .select(
+      `
+      project_id,
+      user_id,
+      profiles(user_id, avatar_url, full_name),
+      projects(
+        projects_id,
+        description,
+        category,
+        user_id,
+        project_name,
+        thumbnail,
+        is_published,
+        published_template
+      )
+    `,
+    );
+
+  if (templatesError) {
+    throw templatesError;
+  }
+
+  const projectIds = (templates ?? []).map(
+    (template: any) => template.project_id,
+  );
+
+  if (projectIds.length === 0) {
+    return [];
+  }
+
+  const likeCounts = await countProjectLikesForProjects(projectIds);
+
+  const templatesWithLikeCount = (templates ?? []).map((template: any) => ({
+    ...template,
+    likeCount: likeCounts[template.project_id] ?? 0,
+  }));
+
+  templatesWithLikeCount.sort((a: any, b: any) => {
+    return (b.likeCount ?? 0) - (a.likeCount ?? 0);
+  });
+
+  return templatesWithLikeCount.slice(0, limit);
+}

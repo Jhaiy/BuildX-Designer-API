@@ -11,6 +11,7 @@ import {
   countProjectLikesForProjects,
   fetchUserComments,
   insertUserComment,
+  fetchMostLikedTemplates,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -206,6 +207,25 @@ export async function handleFetchingCommentsSection(
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to fetch comments",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleFetchMostLikedTemplates(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const limit = Number(req.query.limit) || 20;
+    const templates = await fetchMostLikedTemplates(limit);
+
+    return res.status(200).json({
+      templates,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to fetch most liked templates",
       details: error?.message ?? error,
     });
   }

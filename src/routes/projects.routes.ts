@@ -10,6 +10,7 @@ import {
   handlePublishTemplateStatus,
   handleFetchingCommentsSection,
   handleInsertUserComment,
+  handleFetchMostLikedTemplates,
 } from "../controllers/projects.controller";
 
 const router = Router();
@@ -29,6 +30,8 @@ router.post("/insert-template-data", handleInsertTemplateData);
 router.get("/fetch-comments/:projectId", handleFetchingCommentsSection);
 
 router.post("/insert-comment", handleInsertUserComment);
+
+router.get("/api/most-liked-templates", handleFetchMostLikedTemplates);
 
 router.delete(
   "/unpublish-template/:projectId",
