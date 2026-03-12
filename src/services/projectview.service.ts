@@ -1,25 +1,18 @@
 import supabase from "./database.service";
 
 interface ProjectFilters {
-  lastModified?: string;
-  sortOrder?: "asc";
   sortBy?: "project_name" | "last_modified";
 }
 
 function applyFilters(query: any, filters?: ProjectFilters) {
-  if (!filters) return query;
+  if (!filters?.sortBy) return query;
 
-  if (filters.lastModified) {
-    query = query.lastModified(filters.lastModified);
-  }
+  const sortColumn = {
+    project_name: "project_name",
+    last_modified: "updated_at",
+  } as const;
 
-  if (filters.sortOrder) {
-    query = query.order(filters.sortOrder, {
-      ascending: filters.sortOrder === "asc",
-    });
-  }
-
-  return query;
+  return query.order(sortColumn[filters.sortBy], { ascending: true });
 }
 
 export async function viewSharedProjects(userId: string) {
