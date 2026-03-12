@@ -1,5 +1,27 @@
 import supabase from "./database.service";
 
+interface ProjectFilters {
+  lastModified?: string;
+  sortOrder?: "asc";
+  sortBy?: "project_name" | "last_modified";
+}
+
+function applyFilters(query: any, filters?: ProjectFilters) {
+  if (!filters) return query;
+
+  if (filters.lastModified) {
+    query = query.lastModified(filters.lastModified);
+  }
+
+  if (filters.sortOrder) {
+    query = query.order(filters.sortOrder, {
+      ascending: filters.sortOrder === "asc",
+    });
+  }
+
+  return query;
+}
+
 export async function viewSharedProjects(userId: string) {
   const normalizedUserId = String(userId).trim();
 
@@ -75,4 +97,25 @@ export async function fetchPublishedTemplates(userId: string) {
     throw new Error(error.message);
   }
   return publishedTemplates;
+}
+
+export async function fetchDraftProjects(
+  userId: string,
+  filters?: ProjectFilters,
+) {
+  let query = supabase
+    .from("projects")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_published", false)
+    .eq("published_template", false);
+
+  query = applyFilters(query, filters);
+
+  const { data: draftProjects, error } = await query;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return draftProjects;
 }
