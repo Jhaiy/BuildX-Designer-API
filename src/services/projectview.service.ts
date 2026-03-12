@@ -100,8 +100,6 @@ export async function fetchDraftProjects(
     .from("projects")
     .select("*")
     .eq("user_id", userId)
-    .eq("is_published", false)
-    .eq("published_template", false)
     .eq("status", "draft");
 
   query = applyFilters(query, filters);
