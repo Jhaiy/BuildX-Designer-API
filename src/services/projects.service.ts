@@ -190,7 +190,10 @@ export async function updateTemplateStatus(
 ) {
   const { data, error } = await supabase
     .from("projects")
-    .update({ published_template: isPublished })
+    .update({
+      published_template: isPublished,
+      status: isPublished ? "published" : "draft",
+    })
     .eq("projects_id", projectId)
     .select();
 

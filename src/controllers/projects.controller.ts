@@ -143,6 +143,7 @@ export async function handleUnpublishTemplate(req: Request, res: Response) {
   try {
     const { projectId } = req.params;
     const result = await unpublishTemplate(projectId);
+    await updateTemplateStatus(projectId, false);
     return res.status(200).json(result);
   } catch (error: any) {
     return res.status(500).json({
@@ -156,11 +157,12 @@ export async function handlePublishTemplateStatus(req: Request, res: Response) {
   try {
     const { projectId } = req.params;
     const { isPublished } = req.body;
-    const result = await updateTemplateStatus(projectId, isPublished);
 
     if (isPublished == false) {
       await unpublishTemplate(projectId);
     }
+
+    const result = await updateTemplateStatus(projectId, isPublished);
 
     return res.status(200).json({
       message: "Template status updated successfully",
