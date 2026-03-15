@@ -210,7 +210,6 @@ export async function updateTemplateStatus(
     .from("projects")
     .update({
       published_template: isPublished,
-      status: isPublished ? "published" : "draft",
     })
     .eq("projects_id", projectId)
     .select();
