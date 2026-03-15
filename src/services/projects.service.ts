@@ -159,6 +159,24 @@ export async function displayTemplates() {
   return templates;
 }
 export async function insertTemplateData(projectId: string, userId: string) {
+  if (!projectId || !userId) {
+    throw createServiceError("Missing projectId or userId", 400);
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from("published_templates")
+    .select("project_id")
+    .eq("project_id", projectId)
+    .limit(1);
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if ((existing ?? []).length > 0) {
+    return existing;
+  }
+
   const { data: insertData, error: insertError } = await supabase
     .from("published_templates")
     .insert([{ project_id: projectId, user_id: userId }])

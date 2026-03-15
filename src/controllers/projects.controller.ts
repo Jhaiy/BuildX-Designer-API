@@ -129,13 +129,18 @@ export async function handleInsertTemplateData(req: Request, res: Response) {
     const { projectId, userId } = req.body;
     const insertedData = await insertTemplateData(projectId, userId);
     await updateTemplateStatus(projectId, true);
-    return res
-      .status(201)
-      .json({ message: "Template data inserted successfully", insertedData });
+
+    return res.status(201).json({
+      message: "Template data inserted successfully",
+      insertedData,
+    });
   } catch (error: any) {
-    return res.status(500).json({
+    console.error("[handleInsertTemplateData] error:", error);
+
+    return res.status(error?.status || 500).json({
       error: "Failed to insert template data",
-      details: error?.message ?? error,
+      details: error?.message || error,
+      code: error?.code,
     });
   }
 }
