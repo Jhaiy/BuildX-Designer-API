@@ -1,26 +1,16 @@
 import supabase from "./database.service";
 
 export async function viewPermissions(projectId: string) {
-  const { data: project, error: projectError } = await supabase
-    .from("projects")
-    .select("anyone_can")
-    .eq("projects_id", projectId)
-    .single();
-
-  if (projectError) {
-    throw projectError;
-  }
-
   const { data, error } = await supabase
     .from("project_collaborators")
     .select(
-      "user_id, role, profiles (user_id, avatar_url, full_name, email_address)",
+      "user_id, role, anyone_can, profiles (user_id, avatar_url, full_name, email_address)",
     )
     .eq("project_id", projectId);
 
   if (!error) {
     return {
-      anyone_can: project?.anyone_can ?? "view",
+      anyone_can: data?.[0]?.anyone_can ?? "view",
       collaborators: data ?? [],
     };
   }
@@ -31,7 +21,7 @@ export async function viewPermissions(projectId: string) {
 
   const { data: collaborators, error: collaboratorsError } = await supabase
     .from("project_collaborators")
-    .select("user_id, role")
+    .select("user_id, role, anyone_can")
     .eq("project_id", projectId);
 
   if (collaboratorsError) {
@@ -44,7 +34,7 @@ export async function viewPermissions(projectId: string) {
 
   if (!userIds.length) {
     return {
-      anyone_can: project?.anyone_can ?? "view",
+      anyone_can: collaborators?.[0]?.anyone_can ?? "view",
       collaborators: [],
     };
   }
@@ -63,10 +53,11 @@ export async function viewPermissions(projectId: string) {
   );
 
   return {
-    anyone_can: project?.anyone_can ?? "view",
+    anyone_can: collaborators?.[0]?.anyone_can ?? "view",
     collaborators: (collaborators ?? []).map((collaborator) => ({
       user_id: collaborator.user_id,
       role: collaborator.role,
+      anyone_can: collaborator.anyone_can,
       profiles: profilesByUserId.get(collaborator.user_id) ?? null,
     })),
   };
