@@ -1,6 +1,22 @@
 import supabase from "./database.service";
 
 export async function viewPermissions(projectId: string) {
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select(
+      "projects_id, user_id, is_public, subdomain, is_published, last_published_at, published_template",
+    )
+    .eq("projects_id", projectId)
+    .maybeSingle();
+
+  if (projectError) {
+    throw projectError;
+  }
+
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
   const { data, error } = await supabase
     .from("project_collaborators")
     .select(
@@ -10,6 +26,15 @@ export async function viewPermissions(projectId: string) {
 
   if (!error) {
     return {
+      project: {
+        id: project.projects_id,
+        user_id: project.user_id,
+        is_public: project.is_public,
+        subdomain: project.subdomain,
+        is_published: project.is_published,
+        last_published_at: project.last_published_at,
+        published_template: project.published_template,
+      },
       anyone_can: data?.[0]?.anyone_can ?? "view",
       collaborators: data ?? [],
     };
@@ -28,12 +53,19 @@ export async function viewPermissions(projectId: string) {
     throw collaboratorsError;
   }
 
-  const userIds = (collaborators ?? []).map(
-    (collaborator) => collaborator.user_id,
-  );
+  const userIds = (collaborators ?? []).map((c) => c.user_id);
 
   if (!userIds.length) {
     return {
+      project: {
+        id: project.projects_id,
+        user_id: project.user_id,
+        is_public: project.is_public,
+        subdomain: project.subdomain,
+        is_published: project.is_published,
+        last_published_at: project.last_published_at,
+        published_template: project.published_template,
+      },
       anyone_can: collaborators?.[0]?.anyone_can ?? "view",
       collaborators: [],
     };
@@ -53,6 +85,15 @@ export async function viewPermissions(projectId: string) {
   );
 
   return {
+    project: {
+      id: project.projects_id,
+      user_id: project.user_id,
+      is_public: project.is_public,
+      subdomain: project.subdomain,
+      is_published: project.is_published,
+      last_published_at: project.last_published_at,
+      published_template: project.published_template,
+    },
     anyone_can: collaborators?.[0]?.anyone_can ?? "view",
     collaborators: (collaborators ?? []).map((collaborator) => ({
       user_id: collaborator.user_id,
