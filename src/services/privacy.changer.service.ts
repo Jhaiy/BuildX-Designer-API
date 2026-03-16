@@ -19,4 +19,22 @@ async function changeProjectPrivacySettings(
   }
 }
 
-export { changeProjectPrivacySettings };
+async function changeAnyoneCanPermission(
+  projectId: string,
+  anyoneCan: "edit" | "view",
+) {
+  if (!projectId || !anyoneCan) {
+    throw new Error("Missing fields!");
+  }
+
+  const { error } = await supabase
+    .from("project_collaborators")
+    .update({ anyone_can: anyoneCan })
+    .eq("project_id", projectId);
+
+  if (error) {
+    throw new Error(`Database error: ${error.message}`);
+  }
+}
+
+export { changeProjectPrivacySettings, changeAnyoneCanPermission };

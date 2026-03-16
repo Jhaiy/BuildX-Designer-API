@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
-import { changeProjectPrivacySettings } from "../services/privacy.changer.service";
+import {
+  changeProjectPrivacySettings,
+  changeAnyoneCanPermission,
+} from "../services/privacy.changer.service";
 
 export async function handleChangePrivacySettings(req: Request, res: Response) {
   try {
     let projectId: string | undefined;
     let isPublic: boolean | undefined;
-
-
 
     async function dynamicType(dynamicProjectId: any, dynamicIsPublic: any) {
       if (typeof dynamicProjectId === "string") {
@@ -59,8 +60,37 @@ export async function handleChangePrivacySettings(req: Request, res: Response) {
       .json({ message: "Project privacy settings updated successfully" });
   } catch (error) {
     console.error("Privacy settings error:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to update project privacy settings", error: error instanceof Error ? error.message : String(error) });
+    return res.status(500).json({
+      message: "Failed to update project privacy settings",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+export async function updateAnyoneCanPermission(req: Request, res: Response) {
+  try {
+    const { projectId, anyoneCan } = req.body;
+
+    if (!projectId || !anyoneCan) {
+      return res.status(400).json({
+        error: "projectId and anyoneCan are required",
+      });
+    }
+
+    if (anyoneCan !== "edit" && anyoneCan !== "view") {
+      return res.status(400).json({
+        error: "anyoneCan must be either 'edit' or 'view'",
+      });
+    }
+
+    await changeAnyoneCanPermission(projectId, anyoneCan);
+
+    return res.status(200).json({
+      message: "Anyone-can permission updated successfully",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: error.message || "Failed to update anyone-can permission",
+    });
   }
 }
