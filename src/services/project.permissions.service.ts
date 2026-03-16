@@ -1,6 +1,16 @@
 import supabase from "./database.service";
 
 export async function viewPermissions(projectId: string) {
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("anyone_can")
+    .eq("projects_id", projectId)
+    .single();
+
+  if (projectError) {
+    throw projectError;
+  }
+
   const { data, error } = await supabase
     .from("project_collaborators")
     .select(
@@ -9,7 +19,10 @@ export async function viewPermissions(projectId: string) {
     .eq("project_id", projectId);
 
   if (!error) {
-    return data;
+    return {
+      anyone_can: project?.anyone_can ?? "view",
+      collaborators: data ?? [],
+    };
   }
 
   if (!error.message?.includes("Could not find a relationship")) {
@@ -30,7 +43,10 @@ export async function viewPermissions(projectId: string) {
   );
 
   if (!userIds.length) {
-    return [];
+    return {
+      anyone_can: project?.anyone_can ?? "view",
+      collaborators: [],
+    };
   }
 
   const { data: profiles, error: profilesError } = await supabase
@@ -46,11 +62,14 @@ export async function viewPermissions(projectId: string) {
     (profiles ?? []).map((profile) => [profile.user_id, profile]),
   );
 
-  return (collaborators ?? []).map((collaborator) => ({
-    user_id: collaborator.user_id,
-    role: collaborator.role,
-    profiles: profilesByUserId.get(collaborator.user_id) ?? null,
-  }));
+  return {
+    anyone_can: project?.anyone_can ?? "view",
+    collaborators: (collaborators ?? []).map((collaborator) => ({
+      user_id: collaborator.user_id,
+      role: collaborator.role,
+      profiles: profilesByUserId.get(collaborator.user_id) ?? null,
+    })),
+  };
 }
 
 export async function checkProjectPermission(

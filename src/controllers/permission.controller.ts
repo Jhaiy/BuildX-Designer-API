@@ -22,7 +22,7 @@ export async function handleViewProjectPermissions(
 
   try {
     const permissions = await viewPermissions(projectId);
-    return res.status(200).json({ permissions });
+    return res.status(200).json(permissions);
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to view project permissions",
