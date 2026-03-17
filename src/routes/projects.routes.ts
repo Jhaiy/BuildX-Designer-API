@@ -11,6 +11,7 @@ import {
   handleFetchingCommentsSection,
   handleInsertUserComment,
   handleFetchMostLikedTemplates,
+  handleFetchTrashedTemplates,
 } from "../controllers/projects.controller";
 
 const router = Router();
@@ -32,6 +33,8 @@ router.get("/fetch-comments/:projectId", handleFetchingCommentsSection);
 router.post("/insert-comment", handleInsertUserComment);
 
 router.get("/most-liked-templates", handleFetchMostLikedTemplates);
+
+router.get("/trashed-templates", handleFetchTrashedTemplates);
 
 router.delete(
   "/unpublish-template/:projectId",

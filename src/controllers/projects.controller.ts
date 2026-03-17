@@ -12,6 +12,7 @@ import {
   fetchUserComments,
   insertUserComment,
   fetchMostLikedTemplates,
+  fetchTrashedTemplates,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -231,6 +232,21 @@ export async function handleFetchMostLikedTemplates(
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to fetch most liked templates",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleFetchTrashedTemplates(req: Request, res: Response) {
+  try {
+    const userId = req.query.userId as string;
+    const templates = await fetchTrashedTemplates(userId);
+    return res.status(200).json({
+      templates,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to fetch trashed templates",
       details: error?.message ?? error,
     });
   }

@@ -341,4 +341,18 @@ export async function fetchMostLikedTemplates(limit = 20) {
   return templatesWithLikeCount.slice(0, limit);
 }
 
-//retry
+export async function fetchTrashedTemplates(userId: string) {
+  const { data: trashedTemplates, error } = await supabase
+    .from("projects")
+    .select(
+      "projects_id, project_name, description, category, thumbnail, published_template",
+    )
+    .eq("user_id", userId)
+    .eq("status", "trash");
+
+  if (error) {
+    throw error;
+  }
+
+  return trashedTemplates;
+}
