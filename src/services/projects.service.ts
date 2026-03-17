@@ -356,3 +356,99 @@ export async function fetchTrashedTemplates(userId: string) {
 
   return trashedTemplates;
 }
+
+export async function insertTemplateFlags(
+  projectId: string,
+  userId: string,
+  reason: string[],
+  category: string,
+) {
+  const { data, error } = await supabase
+    .from("template_flags")
+    .insert([
+      {
+        project_id: projectId,
+        user_id: userId,
+        flag_reason: reason,
+        flag_category: category,
+      },
+    ])
+    .select();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function viewTemplateFlags() {
+  const { data: templateFlags, error } = await supabase.from("template_flags")
+    .select(`
+      id,
+      user_id,
+      created_at,
+      flag_category,
+      flag_reason,
+      projects (
+        projects_id,
+        project_name,
+        user_id,
+        description,
+        project_layout,
+        is_public,
+        subdomain,
+        category,
+        thumbnail
+      )
+    `);
+
+  if (error) {
+    throw error;
+  }
+
+  const flags = templateFlags ?? [];
+
+  const authorIds = Array.from(
+    new Set(flags.map((flag: any) => flag.projects?.user_id).filter(Boolean)),
+  );
+
+  if (authorIds.length === 0) {
+    return flags.map((flag: any) => ({
+      ...flag,
+      reporter_id: flag.user_id,
+      projects: flag.projects
+        ? {
+            ...flag.projects,
+            author_id: flag.projects.user_id,
+            author_profile: null,
+          }
+        : null,
+    }));
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("user_id, full_name, avatar_url, email_address")
+    .in("user_id", authorIds);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  const profileMap = new Map(
+    (profiles ?? []).map((profile: any) => [profile.user_id, profile]),
+  );
+
+  return flags.map((flag: any) => ({
+    ...flag,
+    reporter_id: flag.user_id,
+    projects: flag.projects
+      ? {
+          ...flag.projects,
+          author_id: flag.projects.user_id,
+          author_profile: profileMap.get(flag.projects.user_id) ?? null,
+        }
+      : null,
+  }));
+}

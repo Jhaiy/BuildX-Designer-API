@@ -13,6 +13,8 @@ import {
   insertUserComment,
   fetchMostLikedTemplates,
   fetchTrashedTemplates,
+  insertTemplateFlags,
+  viewTemplateFlags,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -247,6 +249,38 @@ export async function handleFetchTrashedTemplates(req: Request, res: Response) {
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to fetch trashed templates",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleInsertTemplateFlags(req: Request, res: Response) {
+  try {
+    const { projectId, userId, reason, category } = req.body;
+    const insertedFlag = await insertTemplateFlags(
+      projectId,
+      userId,
+      reason,
+      category,
+    );
+    return res
+      .status(201)
+      .json({ message: "Template flagged successfully", insertedFlag });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to flag template",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleViewTemplateFlags(req: Request, res: Response) {
+  try {
+    const templateFlags = await viewTemplateFlags();
+    return res.status(200).json({ templateFlags });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to view template flags",
       details: error?.message ?? error,
     });
   }

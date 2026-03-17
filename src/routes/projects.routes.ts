@@ -12,6 +12,8 @@ import {
   handleInsertUserComment,
   handleFetchMostLikedTemplates,
   handleFetchTrashedTemplates,
+  handleInsertTemplateFlags,
+  handleViewTemplateFlags,
 } from "../controllers/projects.controller";
 
 const router = Router();
@@ -35,6 +37,10 @@ router.post("/insert-comment", handleInsertUserComment);
 router.get("/most-liked-templates", handleFetchMostLikedTemplates);
 
 router.get("/trashed-templates", handleFetchTrashedTemplates);
+
+router.post("/insert-flag", handleInsertTemplateFlags);
+
+router.get("/view-flags", handleViewTemplateFlags);
 
 router.delete(
   "/unpublish-template/:projectId",
