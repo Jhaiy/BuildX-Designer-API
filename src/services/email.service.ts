@@ -1,61 +1,67 @@
-import nodemailer from 'nodemailer';
-import cors from 'cors';
-import express, { Express } from 'express';
-import env from 'dotenv'
+import nodemailer from "nodemailer";
+import cors from "cors";
+import express, { Express } from "express";
+import env from "dotenv";
 
 env.config();
 const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
-async function sendConfirmationEmail(to: String) {
-    if (!to) {
-        throw new Error('Missing requirements');
-    }
+async function sendConfirmationEmail(
+  to: String,
+  subject?: string,
+  customHtml?: string,
+) {
+  if (!to) {
+    throw new Error("Missing requirements");
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SERVICE,
+      port: Number(process.env.EMAIL_PORT),
+      secure: false,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
 
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_SERVICE,
-            port: Number(process.env.EMAIL_PORT),
-            secure: false,
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            },
-        });
+    const html =
+      customHtml ||
+      `
+      <h1>BuildX Designer</h1>
+      <p>Your email has been recorded! We will reply to you shortly.</p>
+    `;
 
-        const html = `
-            <h1>BuildX Designer</h1>
-            <p>Your email has been recorded! We will reply to you shortly.</p>
-        `;
-
-        await transporter.sendMail({
-            to: to.toString(),
-            subject: 'BuildX Designer',
-            html: html
-        })
-    } catch (error) {
-        throw new Error('Failed to create transporter');
-    }
+    const mailSubject = subject || "BuildX Designer";
+    await transporter.sendMail({
+      to: to.toString(),
+      subject: mailSubject,
+      html: html,
+    });
+  } catch (error) {
+    throw new Error("Failed to create transporter");
+  }
 }
 
 async function recordEmail(subject: String, from: String, text: String) {
-    if (!subject || !from || !text) {
-        throw new Error('Missing requirements');
-    }
+  if (!subject || !from || !text) {
+    throw new Error("Missing requirements");
+  }
 
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_SERVICE,
-            port: Number(process.env.EMAIL_PORT),
-            secure: false,
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            },
-        });
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SERVICE,
+      port: Number(process.env.EMAIL_PORT),
+      secure: false,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
 
-        const html = `
+    const html = `
             <head>
                 <style>
                     body {
@@ -97,16 +103,16 @@ async function recordEmail(subject: String, from: String, text: String) {
             </body>
         `;
 
-        await transporter.sendMail({
-            from: from.toString(),
-            to: process.env.TEAM_EMAIL,
-            subject: subject.toString(),
-            text: text.toString(),
-            html: html.toString()
-        })
-    } catch (error) {
-        throw new Error('Failed to create transporter');
-    }
-} 
+    await transporter.sendMail({
+      from: from.toString(),
+      to: process.env.TEAM_EMAIL,
+      subject: subject.toString(),
+      text: text.toString(),
+      html: html.toString(),
+    });
+  } catch (error) {
+    throw new Error("Failed to create transporter");
+  }
+}
 
 export { sendConfirmationEmail, recordEmail };
