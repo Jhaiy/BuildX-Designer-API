@@ -14,6 +14,7 @@ import {
   handleFetchTrashedTemplates,
   handleInsertTemplateFlags,
   handleViewTemplateFlags,
+  handleDeleteTemplateFlag,
 } from "../controllers/projects.controller";
 
 const router = Router();
@@ -41,6 +42,8 @@ router.get("/trashed-templates", handleFetchTrashedTemplates);
 router.post("/insert-flag", handleInsertTemplateFlags);
 
 router.get("/view-flags", handleViewTemplateFlags);
+
+router.delete("/delete-flag/:flagId", handleDeleteTemplateFlag);
 
 router.delete(
   "/unpublish-template/:projectId",

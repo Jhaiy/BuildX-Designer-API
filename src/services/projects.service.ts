@@ -452,3 +452,16 @@ export async function viewTemplateFlags() {
       : null,
   }));
 }
+
+export async function deleteTemplateFlag(flagId: string) {
+  const { error } = await supabase
+    .from("template_flags")
+    .delete()
+    .eq("id", flagId);
+
+  if (error) {
+    throw error;
+  }
+
+  return { message: "Flag deleted successfully" };
+}

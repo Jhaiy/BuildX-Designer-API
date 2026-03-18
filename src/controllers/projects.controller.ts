@@ -15,6 +15,7 @@ import {
   fetchTrashedTemplates,
   insertTemplateFlags,
   viewTemplateFlags,
+  deleteTemplateFlag,
 } from "../services/projects.service";
 
 type ControllerError = Error & {
@@ -281,6 +282,21 @@ export async function handleViewTemplateFlags(req: Request, res: Response) {
   } catch (error: any) {
     return res.status(500).json({
       error: "Failed to view template flags",
+      details: error?.message ?? error,
+    });
+  }
+}
+
+export async function handleDeleteTemplateFlag(req: Request, res: Response) {
+  try {
+    const { flagId } = req.params;
+    const deletedFlag = await deleteTemplateFlag(flagId);
+    return res
+      .status(200)
+      .json({ message: "Template flag deleted successfully", deletedFlag });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "Failed to delete template flag",
       details: error?.message ?? error,
     });
   }
