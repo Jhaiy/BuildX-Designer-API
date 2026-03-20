@@ -30,6 +30,11 @@ app.use("/api", projectRoutes);
 app.use("/api", permissionRoutes);
 app.use("/api", projectViewRoutes);
 app.use("/api", onboardingRoutes);
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
